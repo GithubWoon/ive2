@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>재고수량 추가</title>
+</head>
+<body>
+<form action="/managerMenu" method="post" onsubmit="alert('상품이 등록되었습니다.')">
+    <input type="hidden" name="action" value="재고수량 추가">
+    <label for="productName">상품 이름:</label><br>
+    <input type="text" id="productName" name="productName"><br>
+    <label for="quantity">수량:</label><br>
+    <input type="number" id="quantity" name="quantity"><br>
+    <label for="productId">상품 ID:</label><br>
+    <input type="text" id="productId" name="productId"><br>
+    <input type="submit" value="상품추가">
+</form>
+</body>
+</html>

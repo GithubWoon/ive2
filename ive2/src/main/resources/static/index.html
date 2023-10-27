@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home</title>
+</head>
+<body>
+<h1>Welcome</h1>
+<form action="/login" method="post">
+    <input type="text" placeholder="ID" name="id" required>
+    <input type="password" placeholder="Password" name="password" required>
+    <button type="submit">Login</button>
+</form>
+<form action="/signup" method="post">
+    <input type="text" placeholder="ID" name="id" required>
+    <input type="password" placeholder="Password" name="password" required>
+    <button type="submit">Sign Up</button>
+</form>
+<p th:text="${message}"></p>
+</body>
+</html>

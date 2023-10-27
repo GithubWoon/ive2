@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>All Registers Page</title></head>
+
+<body>
+
+<h1>All Registers</h1>
+
+<!-- Add User Form -->
+<form id="addForm" action="#" method="post">
+  <label for="id">ID:</label><br>
+  <input type="text" id="id" name="id"><br>
+  <label for="name">Name:</label><br>
+  <input type="text" id="name" name="name"><br>
+  <label for="password">Password:</label><br>
+  <input type="password" id="password" name ="password"><br><br>
+  <button type= "button" onclick = "submitData()">Submit</button> <!-- Changed to button and added onclick event -->
+</form>
+
+<br>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Password</th> 
+    </tr>
+
+    <!--Tyhmeleaf 라는 서버사이드 템플릿 엔진에 처리되는 코드 -->
+    <tr th:each="register : ${registers}"> <!--reigster 임시변수, registers 객체 리스트-->
+        <td th:text="${register.id}"></td> 
+        <td th:text="${register.name}"></td> 
+        <td th:text="${register.password}"></td>
+    </tr>
+</table>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+function submitData() {
+  var id = $('#id').val();
+  var name = $('#name').val();
+  var password = $('#password').val();
+
+  $.ajax({
+    url: '/api/add', // Change this to your API endpoint
+    data: JSON.stringify({ 'id': id, 'name': name, 'password': password }),
+    type: 'POST',
+    contentType: "application/json",
+    success: function(response) {
+      alert('데이터 추가완료!');
+      location.reload(); // Optional: reload the page to show the updated list
+    },
+    error: function(error) {
+      console.log(error);
+      alert('데이터 추가실패!');
+    }
+  });
+}
+</script>

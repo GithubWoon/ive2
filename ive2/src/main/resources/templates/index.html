@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home</title>
+</head>
+<body>
+<h1> 로그인 하지마세요 </h1>
+<form action="/login" method="post">
+    <input type="text" placeholder="ID" name="id" required>
+    <input type="password" placeholder="Password" name="password" required>
+    <button type="submit">Login</button>
+</form>
+
+<h1> 회원가입에 양보하세요 </h1>
+<form action="/signup" method="post">
+    <label for="id">ID:</label><br>
+    <input type="text" id="id" name="id"><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password"><br>
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <input type="submit" value="Submit">
+</form>
+
+<p th:text="${message}"></p>
+</body>
+</html>

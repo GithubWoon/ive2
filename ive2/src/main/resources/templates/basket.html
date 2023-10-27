@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>메뉴판</title>
+</head>
+<body>
+<h1>메뉴판</h1>
+<form th:action="@{/addToBasket}" method="post">
+    <table>
+        <tr>
+            <th>상품명</th>
+            <th>재고수량</th>
+            <th>선택</th>
+            <th>주문수량</th>
+        </tr>
+        <tr th:each="menu, stat : ${menus}">
+            <td th:text="${menu.productName}"></td>
+            <td th:text="${menu.quantity}"></td>
+            <td><input type="checkbox" th:value="${menu.productName}" th:name="'items['+stat.index+'].productName'" /></td>
+            <td><input type="number" min="1" th:name="'items['+stat.index+'].quantity'" /></td>
+        </tr>
+    </table>
+    <button type="submit">담기</button>
+</form>
+</body>
+</html>

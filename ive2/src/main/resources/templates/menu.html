@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>메뉴판</title>
+</head>
+<body>
+<h1>메뉴판</h1>
+<table>
+    <tr>
+        <th>상품명</th>
+        <th>재고수량</th>
+    </tr>
+    <tr th:each="menu : ${menus}">
+        <td th:text="${menu.productName}"></td>
+        <td th:text="${menu.quantity}"></td>
+    </tr>
+</table>
+</body>
+</html>
