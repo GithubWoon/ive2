@@ -59,6 +59,10 @@ public class ManagerMenuController {
         // 관리자 추가 클릭시
         else if (action.equals("관리자 추가")) {
             if (id != null && pw != null && name != null) {
+                if (managerRepository.existsById(id)) {
+                    model.addAttribute("errorMessage", "중복된 ID입니다.");
+                    return "addManager";
+                }
                 Manager newManager = new Manager();
                 newManager.setId(id);
                 newManager.setPassword(pw);
@@ -67,7 +71,7 @@ public class ManagerMenuController {
             }
             return "addManager";
         }
-       
+
         // 종료 클릭시
         else if (action.equals("종료")) {
             request.getSession().invalidate(); // 세션 초기화
