@@ -44,7 +44,7 @@ public class UserService {
 
         if (!managers.isEmpty()) {
             session.setAttribute("managerId", managers.get(0).getId()); // 세션에 관리자 ID 저장
-            session.setAttribute("mangerName", managers.get(0).getName()); // 세션에 관리자 이름 저장
+            session.setAttribute("managerName", managers.get(0).getName()); // 세션에 관리자 이름 저장
             return "/managerMenu";
         }
 

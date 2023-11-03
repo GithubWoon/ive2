@@ -13,6 +13,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.sql.Timestamp;
 
 @Controller
 public class UserMenuController {
@@ -30,6 +31,7 @@ public class UserMenuController {
     public String handleRequest(@RequestParam String action, Model model, HttpServletRequest request) {
         HttpSession session = request.getSession(); // 세션 객체 얻기
         String userId = (String) session.getAttribute("userId");
+        String userName = (String) session.getAttribute("userName");
 
         // 메뉴판 보기 클릭시
         if (action.equals("메뉴판 보기")) {
@@ -44,14 +46,15 @@ public class UserMenuController {
             return "redirect:/"; // 초기 페이지로 리다이렉트
         }
 
+        // 장바구니 담기 클릭시
         else if (action.equals("장바구니 담기")) {
             List<Menu> menus = menuRepository.findAll();
             model.addAttribute("menus", menus);
             return "basket";
         }
 
+        // 장바구니 보기 클릭시
         else if (action.equals("장바구니 보기")) {
-
             // userId와 일치하는 BASKET 테이블의 데이터를 가져옴
             String sql = "SELECT PRODUCTNAME, QUANTITY FROM BASKET WHERE ID = ?";
             List<Map<String, Object>> basketItems = jdbcTemplate.queryForList(sql, userId);
@@ -62,6 +65,7 @@ public class UserMenuController {
             return "look";
         }
 
+        // 취소 클릭시
         else if (action.equals("취소")) {
             // 로그인한 사용자의 BASKET 테이블의 모든 데이터 삭제
             String sql = "DELETE FROM BASKET WHERE ID = ?";
@@ -69,14 +73,29 @@ public class UserMenuController {
             return "userMenu";
         }
 
+        // 구매 클릭시
         else if (action.equals("구매")) {
             // 로그인한 사용자의 BASKET 테이블의 모든 데이터를 MENU 테이블에서 감소
             String sqlSelect = "SELECT PRODUCTNAME, QUANTITY FROM BASKET WHERE ID = ?";
             List<Map<String, Object>> basketItems = jdbcTemplate.queryForList(sqlSelect, userId);
 
+            // 현재 시간을 가져옴
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+            // RECEIPT 테이블에서 현재 PURCHASENUM의 최댓값을 찾음
+            String sqlMaxPurchaseNum = "SELECT MAX(PURCHASENUM) FROM RECEIPT";
+           Integer maxPurchaseNum = jdbcTemplate.queryForObject(sqlMaxPurchaseNum, Integer.class);
+
+            // 최댓값이 null인 경우(테이블에 데이터가 없는 경우) 처리
+            int purchaseNum = (maxPurchaseNum == null) ? 1 : maxPurchaseNum + 1;
+
             for (Map<String, Object> item : basketItems) {
                 String productName = (String) item.get("PRODUCTNAME");
                 int quantity = ((BigDecimal) item.get("QUANTITY")).intValue();
+
+                // RECEIPT 테이블에 데이터 추가
+                String sqlInsert = "INSERT INTO RECEIPT (ID, NAME, PRODUCTNAME, QUANTITY, BUYDAY, PURCHASENUM) VALUES (?, ?, ?, ?, ?, ?)";
+                jdbcTemplate.update(sqlInsert, userId, userName, productName, quantity, timestamp, purchaseNum);
 
                 String sqlUpdate = "UPDATE MENU SET QUANTITY = QUANTITY - ? WHERE PRODUCTNAME = ?";
                 jdbcTemplate.update(sqlUpdate, quantity, productName);
