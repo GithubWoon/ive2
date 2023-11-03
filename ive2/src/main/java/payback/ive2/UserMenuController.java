@@ -84,7 +84,7 @@ public class UserMenuController {
 
             // RECEIPT 테이블에서 현재 PURCHASENUM의 최댓값을 찾음
             String sqlMaxPurchaseNum = "SELECT MAX(PURCHASENUM) FROM RECEIPT";
-           Integer maxPurchaseNum = jdbcTemplate.queryForObject(sqlMaxPurchaseNum, Integer.class);
+            Integer maxPurchaseNum = jdbcTemplate.queryForObject(sqlMaxPurchaseNum, Integer.class);
 
             // 최댓값이 null인 경우(테이블에 데이터가 없는 경우) 처리
             int purchaseNum = (maxPurchaseNum == null) ? 1 : maxPurchaseNum + 1;
@@ -145,9 +145,19 @@ public class UserMenuController {
                     return "redirect:/userMenu?error=invalid_quantity";
                 }
 
-                // productName과 quantity를 BASKET 테이블에 저장
-                String sql = "INSERT INTO BASKET (ID, NAME, PRODUCTNAME, QUANTITY) VALUES (?, ?, ?, ?)";
-                jdbcTemplate.update(sql, userId, userName, productName, orderQuantity);
+                // Check if the product is already in the basket
+                String sqlCheck = "SELECT * FROM BASKET WHERE ID = ? AND PRODUCTNAME = ?";
+                List<Map<String, Object>> matchingItems = jdbcTemplate.queryForList(sqlCheck, userId, productName);
+
+                if (!matchingItems.isEmpty()) {
+                    // The product is already in the basket, update the quantity
+                    String sqlUpdate = "UPDATE BASKET SET QUANTITY = QUANTITY + ? WHERE ID = ? AND PRODUCTNAME = ?";
+                    jdbcTemplate.update(sqlUpdate, orderQuantity, userId, productName);
+                } else {
+                    // The product is not in the basket, insert a new item
+                    String sqlInsert = "INSERT INTO BASKET (ID, NAME, PRODUCTNAME, QUANTITY) VALUES (?, ?, ?, ?)";
+                    jdbcTemplate.update(sqlInsert, userId, userName, productName, orderQuantity);
+                }
             }
         }
         return "redirect:/userMenu";
