@@ -1,8 +1,21 @@
 package payback.ive2;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "MANAGER")
 public class Manager {
+
+    @Id
     private String id;
+
+    @Column(name = "PW")
     private String password;
+
+    private String name;
 
     // getter and setter methods
     public String getId() {
@@ -19,5 +32,13 @@ public class Manager {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

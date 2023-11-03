@@ -10,6 +10,7 @@ public class UserRowMapper implements RowMapper<User> {
         User user = new User();
         user.setId(rs.getString("ID"));
         user.setPassword(rs.getString("PW"));
+        user.setName(rs.getString("NAME")); // 사용자 이름 설정
         // 여기서 User는 당신이 정의한 도메인 클래스입니다.
         // 추가적인 필드가 있다면, 여기서 설정해주시면 됩니다.
         return user;

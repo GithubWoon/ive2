@@ -1,13 +1,11 @@
 package payback.ive2;
-// ㅎㅇ
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 import javax.servlet.http.HttpSession;
-
-// Other imports
 
 @Controller
 public class UserController {
@@ -24,9 +22,10 @@ public class UserController {
 
     @PostMapping("/login")
     public String login(@RequestParam String id, @RequestParam String password, Model model, HttpSession session) {
-        String message = userService.login(id, password);
+        String message = userService.login(id, password, session); // 세 개의 매개변수를 전달
         if (message.equals("/userMenu") || message.equals("/managerMenu")) {
             session.setAttribute("loggedIn", true);
+            session.setAttribute("userId", id); // 사용자 ID를 세션에 저장
             return "redirect:" + message;
         } else {
             model.addAttribute("message", message);

@@ -1,26 +1,41 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <title>메뉴판</title>
-</head>
-<body>
-<h1>메뉴판</h1>
-<form th:action="@{/addToBasket}" method="post">
-    <table>
+  </head>
+  <body>
+    <h1>메뉴판</h1>
+    <form th:action="@{/addToBasket}" method="post">
+      <table>
         <tr>
-            <th>상품명</th>
-            <th>재고수량</th>
-            <th>선택</th>
-            <th>주문수량</th>
+          <th>상품명</th>
+          <th>재고수량</th>
+          <th>선택</th>
+          <th>주문수량</th>
         </tr>
+        <!--상품명과 현재 재고수량-->
         <tr th:each="menu, stat : ${menus}">
-            <td th:text="${menu.productName}"></td>
-            <td th:text="${menu.quantity}"></td>
-            <td><input type="checkbox" th:value="${menu.productName}" th:name="'items['+stat.index+'].productName'" /></td>
-            <td><input type="number" min="1" th:name="'items['+stat.index+'].quantity'" /></td>
+          <td th:text="${menu.productName}"></td>
+          <td th:text="${menu.quantity}"></td>
+          <!--체크박스의 값은 상품명, 체크박스의 이름에 인덱스 추가-->
+          <td>
+            <input
+              type="checkbox"
+              th:value="${menu.productName}"
+              th:name="${'productName' + stat.count}"
+            />
+          </td>
+          <!--주문수량 입력필드 상자, 필드 이름에 인덱스 추가-->
+          <td>
+            <input
+              type="number"
+              min="1"
+              th:name="${'quantity' + stat.count}"
+            />
+          </td>
         </tr>
-    </table>
-    <button type="submit">담기</button>
-</form>
-</body>
+      </table>
+      <button type="submit">담기</button>
+    </form>
+  </body>
 </html>
