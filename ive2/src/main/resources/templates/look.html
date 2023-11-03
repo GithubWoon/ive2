@@ -1,10 +1,46 @@
-<table>
-    <tr>
-        <th>상품명</th>
-        <th>주문수량</th>
-    </tr>
-    <tr th:each="item : ${basketItems}">
-        <td th:text="${item.PRODUCTNAME}"></td>
-        <td th:text="${item.QUANTITY}"></td>
-    </tr>
-</table>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>장바구니</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+            color: black;
+        }
+        .container {
+            width: 60%;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #4CAF50;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>장바구니</h1>
+        <table>
+            <tr>
+                <th>상품명</th>
+                <th>주문수량</th>
+            </tr>
+            <tr th:each="item : ${basketItems}">
+                <td th:text="${item.PRODUCTNAME}"></td>
+                <td th:text="${item.QUANTITY}"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

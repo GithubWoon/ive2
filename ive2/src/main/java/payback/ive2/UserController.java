@@ -41,6 +41,11 @@ public class UserController {
         return "index";
     }
 
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
+
     @GetMapping("/userMenu")
     public String userMenu(HttpSession session) {
         if (session.getAttribute("loggedIn") == null) {
