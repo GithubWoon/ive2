@@ -1,6 +1,7 @@
 package payback.ive2;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.ui.Model;
 import java.util.Optional;
 import java.math.BigDecimal;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -114,11 +116,13 @@ public class UserMenuController {
     }
 
     @PostMapping("/addToBasket")
-    public String addToBasket(HttpServletRequest request) {
-        HttpSession session = request.getSession(); // 세션 객체 얻기
-        String userName = (String) session.getAttribute("userName"); // 세션에서 사용자 이름 가져오기
+    public ResponseEntity<Map<String, String>> addToBasket(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String userName = (String) session.getAttribute("userName");
         String userId = (String) session.getAttribute("userId");
         Enumeration<String> parameterNames = request.getParameterNames();
+
+        Map<String, String> response = new HashMap<>();
 
         while (parameterNames.hasMoreElements()) {
             String paramName = parameterNames.nextElement();
@@ -128,39 +132,30 @@ public class UserMenuController {
                 String quantity = request.getParameter("quantity" + paramName.substring(11));
                 int orderQuantity = Integer.parseInt(quantity);
 
-                // Find the product in the MENU table
                 Optional<Menu> optionalMenu = menuRepository.findByProductName(productName);
-
-                // Check if the menu exists
-                if (!optionalMenu.isPresent()) {
-                    // The menu does not exist, return an error message
-                    return "redirect:/userMenu?error=menu_not_found";
-                }
 
                 Menu menu = optionalMenu.get();
 
-                // 주문수량이 재고보다 많은경우
                 if (orderQuantity < 1 || orderQuantity > menu.getQuantity()) {
-                    // The order quantity is not valid, return an error message
-                    return "redirect:/userMenu?error=invalid_quantity";
+                    response.put("message", "주문 수량 제대로 입력했어?");
+                    return ResponseEntity.ok(response);
                 }
 
-                // Check if the product is already in the basket
                 String sqlCheck = "SELECT * FROM BASKET WHERE ID = ? AND PRODUCTNAME = ?";
                 List<Map<String, Object>> matchingItems = jdbcTemplate.queryForList(sqlCheck, userId, productName);
 
                 if (!matchingItems.isEmpty()) {
-                    // The product is already in the basket, update the quantity
                     String sqlUpdate = "UPDATE BASKET SET QUANTITY = QUANTITY + ? WHERE ID = ? AND PRODUCTNAME = ?";
                     jdbcTemplate.update(sqlUpdate, orderQuantity, userId, productName);
                 } else {
-                    // The product is not in the basket, insert a new item
                     String sqlInsert = "INSERT INTO BASKET (ID, NAME, PRODUCTNAME, QUANTITY) VALUES (?, ?, ?, ?)";
                     jdbcTemplate.update(sqlInsert, userId, userName, productName, orderQuantity);
                 }
             }
         }
-        return "redirect:/userMenu";
+
+        response.put("message", "추가완료 한번 확인해봐");
+        return ResponseEntity.ok(response);
     }
 
 }
