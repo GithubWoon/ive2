@@ -139,7 +139,7 @@ public class UserMenuController {
 
                 Menu menu = optionalMenu.get();
 
-                // Check if the order quantity is valid
+                // 주문수량이 재고보다 많은경우
                 if (orderQuantity < 1 || orderQuantity > menu.getQuantity()) {
                     // The order quantity is not valid, return an error message
                     return "redirect:/userMenu?error=invalid_quantity";
