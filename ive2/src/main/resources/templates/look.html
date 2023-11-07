@@ -26,7 +26,45 @@
             padding: 10px;
             text-align: center;
         }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .button-container button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .button-container button:hover {
+            background-color: #45a049;
+        }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("form").on("submit", function (event) {
+          event.preventDefault();
+
+          $.ajax({
+            url: "/look",
+            type: "post",
+            data: $(this).serialize(),
+            success: function (response) {
+              if (response.message) {
+                alert(response.message);
+              }
+
+              window.location.href = "/userMenu";
+            },
+          });
+        });
+      });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -41,6 +79,16 @@
                 <td th:text="${item.QUANTITY}"></td>
             </tr>
         </table>
+        <div class="button-container">
+            <form action="/look" method="post">
+                <input type="hidden" name="action" value="취소" />
+                <button type="submit">취소</button>
+            </form>
+            <form action="/look" method="post">
+                <input type="hidden" name="action" value="구매" />
+                <button type="submit">구매</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
