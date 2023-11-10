@@ -1,6 +1,7 @@
 package payback.ive2;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
@@ -33,86 +34,68 @@ public class UserMenuController {
     public String handleRequest(@RequestParam String action, Model model, HttpServletRequest request) {
         HttpSession session = request.getSession(); // 세션 객체 얻기
         String userId = (String) session.getAttribute("userId");
-        String userName = (String) session.getAttribute("userName");
 
-        // 메뉴판 보기 클릭시
         if (action.equals("메뉴판 보기")) {
-            List<Menu> menus = menuRepository.findAll();
-            model.addAttribute("menus", menus);
-            return "menu"; // menu.html 반환
-        }
-
-        // 종료 클릭시
-        else if (action.equals("종료")) {
-            request.getSession().invalidate(); // 세션 초기화
-            return "redirect:/"; // 초기 페이지로 리다이렉트
-        }
-
-        // 장바구니 담기 클릭시
-        else if (action.equals("장바구니 담기")) {
-            List<Menu> menus = menuRepository.findAll();
-            model.addAttribute("menus", menus);
-            return "basket";
-        }
-
-        // 장바구니 보기 클릭시
-        else if (action.equals("장바구니 보기")) {
-            // userId와 일치하는 BASKET 테이블의 데이터를 가져옴
-            String sql = "SELECT PRODUCTNAME, QUANTITY FROM BASKET WHERE ID = ?";
-            List<Map<String, Object>> basketItems = jdbcTemplate.queryForList(sql, userId);
-
-            // 가져온 데이터를 모델에 추가
-            model.addAttribute("basketItems", basketItems);
-
-            return "look";
-        }
-
-        // 취소 클릭시
-        else if (action.equals("취소")) {
-            // 로그인한 사용자의 BASKET 테이블의 모든 데이터 삭제
-            String sql = "DELETE FROM BASKET WHERE ID = ?";
-            jdbcTemplate.update(sql, userId);
-            return "userMenu";
-        }
-
-        // 구매 클릭시
-        else if (action.equals("구매")) {
-            // 로그인한 사용자의 BASKET 테이블의 모든 데이터를 MENU 테이블에서 감소
-            String sqlSelect = "SELECT PRODUCTNAME, QUANTITY FROM BASKET WHERE ID = ?";
-            List<Map<String, Object>> basketItems = jdbcTemplate.queryForList(sqlSelect, userId);
-
-            // 현재 시간을 가져옴
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-
-            // RECEIPT 테이블에서 현재 PURCHASENUM의 최댓값을 찾음
-            String sqlMaxPurchaseNum = "SELECT MAX(PURCHASENUM) FROM RECEIPT";
-            Integer maxPurchaseNum = jdbcTemplate.queryForObject(sqlMaxPurchaseNum, Integer.class);
-
-            // 최댓값이 null인 경우(테이블에 데이터가 없는 경우) 처리
-            int purchaseNum = (maxPurchaseNum == null) ? 1 : maxPurchaseNum + 1;
-
-            for (Map<String, Object> item : basketItems) {
-                String productName = (String) item.get("PRODUCTNAME");
-                int quantity = ((BigDecimal) item.get("QUANTITY")).intValue();
-
-                // RECEIPT 테이블에 데이터 추가
-                String sqlInsert = "INSERT INTO RECEIPT (ID, NAME, PRODUCTNAME, QUANTITY, BUYDAY, PURCHASENUM) VALUES (?, ?, ?, ?, ?, ?)";
-                jdbcTemplate.update(sqlInsert, userId, userName, productName, quantity, timestamp, purchaseNum);
-
-                String sqlUpdate = "UPDATE MENU SET QUANTITY = QUANTITY - ? WHERE PRODUCTNAME = ?";
-                jdbcTemplate.update(sqlUpdate, quantity, productName);
-            }
-
-            // 로그인한 사용자의 BASKET 테이블의 모든 데이터 삭제
-            String sqlDelete = "DELETE FROM BASKET WHERE ID = ?";
-            jdbcTemplate.update(sqlDelete, userId);
-
-            return "userMenu";
-        }
-
-        else {
+            return handleMenuView(model, session, userId);
+        } else if (action.equals("종료")) {
+            return handleExit(request);
+        } else if (action.equals("장바구니 담기")) {
+            return handleBasketAdd(model);
+        } else if (action.equals("장바구니 보기")) {
+            return handleBasketView(model, userId);
+        } else if (action.equals("잔액 충전")) {
+            return "charge";
+        } else {
             return "userMenu"; // 그밖의 action은 userMenu.html로 다시 돌아감
         }
+    }
+
+    // 메뉴판 보여줌
+    private String handleMenuView(Model model, HttpSession session, String userId) {
+        List<Menu> menus = menuRepository.findAll();
+        model.addAttribute("menus", menus);
+        updateBalance(session, userId);
+        return "menu"; // menu.html 반환
+    }
+
+    // 잔액 추가
+    private void updateBalance(HttpSession session, String userId) {
+        try {
+            String sql = "SELECT BALANCE FROM BALANCE WHERE ID = ?";
+            Integer balance = jdbcTemplate.queryForObject(sql, Integer.class, userId);
+            if (balance == null) {
+                balance = 0;
+            }
+            session.setAttribute("balance", balance);
+        } catch (EmptyResultDataAccessException e) {
+            // 결과가 없으면 기본 잔액을 0으로 설정
+            session.setAttribute("balance", 0);
+        }
+    }
+
+    // 초기 페이지로 돌아가줌
+    private String handleExit(HttpServletRequest request) {
+        request.getSession().invalidate(); // 세션 초기화
+        return "redirect:/"; // 초기 페이지로 리다이렉트
+    }
+
+    // 장바구니 추가
+    private String handleBasketAdd(Model model) {
+        List<Menu> menus = menuRepository.findAll();
+        model.addAttribute("menus", menus);
+        return "basket";
+    }
+
+    // 장바구니 보여줌
+    private String handleBasketView(Model model, String userId) {
+        // userId와 일치하는 BASKET 테이블의 데이터를 가져옴
+        String sql = "SELECT PRODUCTNAME, QUANTITY FROM BASKET WHERE ID = ?";
+        List<Map<String, Object>> basketItems = jdbcTemplate.queryForList(sql, userId);
+
+        // 가져온 데이터를 모델에 추가
+        model.addAttribute("basketItems", basketItems);
+
+        return "look";
     }
 
     @PostMapping("/addToBasket")
@@ -219,5 +202,21 @@ public class UserMenuController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    // UserMenuController.java
+    @PostMapping("/charge")
+    public String handleCharge(@RequestParam Integer amount, HttpServletRequest request) {
+        HttpSession session = request.getSession(); // 세션 객체 얻기
+        String userId = (String) session.getAttribute("userId");
+        String userName = (String) session.getAttribute("userName");
+
+        // BALANCE 테이블에서 ID와 NAME으로 잔액을 찾아 업데이트
+        String sql = "UPDATE BALANCE SET BALANCE = BALANCE + ? WHERE ID = ? AND NAME = ?";
+        jdbcTemplate.update(sql, amount, userId, userName);
+
+        return "redirect:/userMenu"; // 충전 후 메뉴 페이지로 리다이렉트
+    }
+
+    
 
 }

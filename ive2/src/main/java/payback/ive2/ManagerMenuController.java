@@ -12,12 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 public class ManagerMenuController {
     private final MenuRepository menuRepository;
     private final ManagerRepository managerRepository;
+    private final ReceiptRepository receiptRepository;  // 이 부분을 추가해주세요.
 
-    public ManagerMenuController(MenuRepository menuRepository, ManagerRepository managerRepository) {
+    public ManagerMenuController(MenuRepository menuRepository, ManagerRepository managerRepository, ReceiptRepository receiptRepository) {  // 이 부분을 수정해주세요.
         this.menuRepository = menuRepository;
         this.managerRepository = managerRepository;
+        this.receiptRepository = receiptRepository;  // 이 부분을 추가해주세요.
     }
-
     @PostMapping("/managerMenu")
     public String handleRequest(@RequestParam String action,
             @RequestParam(required = false) String productName,
@@ -32,7 +33,7 @@ public class ManagerMenuController {
         if (action.equals("메뉴판 보기")) {
             List<Menu> menus = menuRepository.findAll();
             model.addAttribute("menus", menus);
-            return "menu"; // menu.html 반환
+            return "menu"; 
         }
         // 재고수량 클릭시
         else if (action.equals("재고수량 추가")) {
@@ -40,12 +41,10 @@ public class ManagerMenuController {
                 Optional<Menu> existingMenu = menuRepository.findByProductName(productName);
 
                 if (existingMenu.isPresent()) {
-                    // 이미 존재하는 메뉴의 경우, 수량만 업데이트
                     Menu menu = existingMenu.get();
                     menu.setQuantity(menu.getQuantity() + quantity);
                     menuRepository.save(menu);
                 } else {
-                    // 새로운 메뉴의 경우, 메뉴 추가
                     Menu newMenu = new Menu();
                     newMenu.setProductName(productName);
                     newMenu.setQuantity(quantity);
@@ -53,7 +52,7 @@ public class ManagerMenuController {
                     menuRepository.save(newMenu);
                 }
             }
-            return "addQuantity"; // addQuantity.html 반환
+            return "addQuantity"; 
         }
 
         // 관리자 추가 클릭시
@@ -68,17 +67,34 @@ public class ManagerMenuController {
                 newManager.setPassword(pw);
                 newManager.setName(name);
                 managerRepository.save(newManager);
+                model.addAttribute("successMessage", "관리자가 성공적으로 추가되었습니다."); 
             }
             return "addManager";
         }
 
+        // 구매내역 클릭시
+        // else if (action.equals("구매내역 보기")) {
+        //     // 구매내역을 가져와서 model에 추가하는 코드가 여기에 위치해야 합니다.
+        //     // 현재는 임의의 구매내역을 추가하도록 하겠습니다.
+        //     model.addAttribute("purchaseHistory", "임의의 구매내역");
+        //     return "Receipt"; // Receipt.html 반환
+        // }
+
+        else if (action.equals("구매내역 보기")) {
+            // 구매내역을 가져와서 model에 추가하는 코드
+            List<Receipt> receipts = receiptRepository.findAll();
+            model.addAttribute("purchaseHistory", receipts);
+            return "Receipt"; // Receipt.html 반환
+        }
+
+
+
         // 종료 클릭시
         else if (action.equals("종료")) {
-            request.getSession().invalidate(); // 세션 초기화
-            return "redirect:/"; // 초기 페이지로 리다이렉트
-
+            request.getSession().invalidate(); 
+            return "redirect:/"; 
         } else {
-            return "managerMenu"; // 그밖의 action은 managerMenu.html로 다시 돌아감
+            return "managerMenu"; 
         }
     }
 }
