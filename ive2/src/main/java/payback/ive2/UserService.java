@@ -80,6 +80,10 @@ public class UserService {
             }
 
             jdbcTemplate.update("INSERT INTO USERS (ID, PW, NAME) VALUES (?, ?, ?)", id, password, name);
+
+            // BALANCE 테이블에 데이터 추가
+            jdbcTemplate.update("INSERT INTO BALANCE (ID, NAME, BALANCE) VALUES (?, ?, ?)", id, name, 0);
+
             return "회원가입 성공";
         } catch (Exception e) {
             return "회원가입 과정에서 오류가 발생했습니다.";

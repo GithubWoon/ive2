@@ -76,13 +76,14 @@
     <nav class="navi">
         <ul>
             <li>
-                <h1><span th:text="${session.userName} + ' 님의 잔액: ' + ${userBalance} + '원'"></span></h1>
+                <h1><span th:text="${balance} + '원'"></span></h1>
             </li>
             <li>
                 <div class="container">
                     <input type="submit" name="action" value="메뉴판 보기" /><span> | </span>
                     <input type="submit" name="action" value="장바구니 담기" /><span> | </span>
                     <input type="submit" name="action" value="장바구니 보기" /><span> | </span>
+                    <input type="submit" name="action" value="잔액 충전" /><span> | </span>
                     <input type="submit" name="action" value="종료" />
                 </div>
             </li>
