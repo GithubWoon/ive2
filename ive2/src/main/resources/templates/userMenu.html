@@ -76,7 +76,7 @@
     <nav class="navi">
         <ul>
             <li>
-                <h1><span th:text="${balance} + '원'"></span></h1>
+                <h1><span th:text="${session.userName} + ' 님의 잔액: ' + ${userBalance} + '원'"></span></h1>
             </li>
             <li>
                 <div class="container">
@@ -103,6 +103,22 @@
             <img alt="I'VE IVE" src="https://cdnimg.melon.co.kr/cm2/album/images/112/11/297/11211297_20230410151046_500.jpg?1af1b1d675154cbc4d581f9b36c75ebf/melon/resize/260/quality/80/optimize">
             <img alt="I'VE MINE" src="https://cdnimg.melon.co.kr/cm2/album/images/113/33/459/11333459_20231013103537_500.jpg?faf3d08c19b6937258fd17162051dbc8/melon/resize/260/quality/80/optimize">
         </div>
+    </div>
+
+    <div>
+        <h2>Balance Data</h2>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Balance</th>
+            </tr>
+            <tr th:each="data : ${balanceData}">
+                <td th:text="${data.ID}"></td>
+                <td th:text="${data.NAME}"></td>
+                <td th:text="${data.BALANCE}"></td>
+            </tr>
+        </table>
     </div>
     
 </form>
